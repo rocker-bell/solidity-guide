@@ -2,7 +2,7 @@
 
 A handy cheatsheet for **Solidity** to help developers write **Ethereum Smart Contracts**.  
 
-> This is a general overview; for a full interactive guide, check the [GitHub Pages site](https://<username>.github.io/<repo>/).
+> This is a general overview; for a full interactive guide, check the [GitHub Pages site]([https://<username>.github.io/<repo>/](https://rocker-bell.github.io/solidity-guide/)).
 
 ## Table of Contents
 
