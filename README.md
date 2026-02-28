@@ -1,205 +1,236 @@
-# solidity-guide
+---
+layout: home
+title: Solidity Guide
+nav_order: 1
+---
 
-## Motivation
+# Solidity Guide
 
-This document is a cheatsheet for **Solidity** that you can use to write **Smart Contracts** for **Ethereum** based blockchain.
+A practical cheatsheet for writing Smart Contracts in **Solidity 0.8.x**.
 
-This guide is not intended to teach you Solidity from the ground up, but to help developers with basic knowledge who may struggle to get familiar with Smart Contracts and Blockchain because of the Solidity concepts used.
+This guide is not meant to teach Solidity from scratch.  
+It is intended for developers who already understand programming fundamentals and want a structured reference.
 
-> **Note:** If you have basic knowledge in JavaScript, it's easier to learn Solidity.
+> 💡 If you know JavaScript, learning Solidity is significantly easier.
 
 ---
 
-## Version pragma
+# Version Pragma
 
 ```solidity
 pragma solidity ^0.8.0;
 ```
 
-`pragma solidity ^0.8.0;` compiles with compiler version >= 0.8.0 and < 0.9.0.
+`^0.8.0` compiles with:
+>= 0.8.0 and < 0.9.0
+
+> ⚠️ Solidity 0.8.x introduced automatic overflow & underflow protection.
 
 ---
 
-## Import files
+# Imports
 
 ```solidity
 import "filename.sol";
-import * as symbolName from "filename.sol";
-import {symbol1 as alias, symbol2} from "filename.sol";
+import * as Math from "./Math.sol";
+import {symbol1 as alias, symbol2} from "./file.sol";
 ```
 
 ---
 
-## Types
+# Types
 
-### Boolean
+## Boolean
 
-`bool` : `true` or `false`
+```solidity
+bool isActive = true;
+```
 
 Operators:
-- Logical : `!`, `&&`, `||`
-- Comparisons : `==`, `!=`
+- `!`
+- `&&`
+- `||`
+- `==`
+- `!=`
 
 ---
 
-### Integer
+## Integers
 
-Unsigned : `uint8 | uint16 | uint32 | uint64 | uint128 | uint256 (uint)`
-Signed   : `int8  | int16  | int32  | int64  | int128  | int256 (int)`
+Unsigned:
+```solidity
+uint256 value;
+uint8 small;
+```
+
+Signed:
+```solidity
+int256 number;
+```
 
 Operators:
-- Comparisons: `<=`, `<`, `==`, `!=`, `>=`, `>`
-- Bit operators: `&`, `|`, `^`, `~`
-- Arithmetic operators: `+`, `-`, `*`, `/`, `%`, `**`, `<<`, `>>`
+- Arithmetic: `+ - * / % **`
+- Comparison: `<= < > >= == !=`
+- Bitwise: `& | ^ ~ << >>`
 
-> In Solidity 0.8.x, arithmetic overflow and underflow automatically revert.
+> ✅ In Solidity 0.8+, overflow automatically reverts.  
 > SafeMath is no longer required.
 
+If you intentionally want wrapping behavior:
+
+```solidity
+unchecked {
+    counter++;
+}
+```
+
 ---
 
-### Address
+## Address
 
-`address`: Holds an Ethereum address (20 bytes).  
-`address payable`: Same as address but allows `transfer` and `send`.
-
-Methods:
-
-#### balance
 ```solidity
+address user;
+address payable receiver;
+```
+
+### Balance
+
+```solidity
+user.balance;
 address(this).balance;
 ```
 
-#### transfer and send
+### Transfer Ether
+
 ```solidity
-payable(addr).transfer(amount);   // reverts on failure
-payable(addr).send(amount);       // returns false on failure
+receiver.transfer(1 ether); // reverts on failure
+receiver.send(1 ether);     // returns false on failure
 ```
 
-#### call
+### Low-Level Call
+
 ```solidity
-(bool success, bytes memory data) = addr.call{value: 1 ether}("");
+(bool success, bytes memory data) =
+    user.call{value: 1 ether}("");
+
 require(success);
 ```
 
-#### delegatecall
+### delegatecall
+
 ```solidity
-(bool success, ) = addr.delegatecall(
+(bool success, ) = target.delegatecall(
     abi.encodeWithSignature("setValue(uint256)", 10)
 );
 require(success);
 ```
 
-> delegatecall executes code of another contract in the context of the calling contract.
+> ⚠️ delegatecall executes in the caller’s storage context.
 
 ---
 
-### Array
+## Arrays
 
 ```solidity
 uint[] dynamicArray;
-uint[7] fixedArray;
+uint[5] fixedArray;
 ```
 
 ---
 
-### Fixed byte arrays
+## Bytes
 
-`bytes1` ... `bytes32`
-
-Members:
-- `.length` (read-only)
-
----
-
-### Dynamic byte arrays
-
-`bytes` – dynamic byte array  
-`string` – UTF-8 encoded string
-
----
-
-### Enum
-
+Fixed:
 ```solidity
-enum ActionChoices { GoLeft, GoRight, GoStraight, SitStill }
+bytes32 data;
+```
 
-ActionChoices choice = ActionChoices.GoStraight;
+Dynamic:
+```solidity
+bytes memory raw;
+string memory text;
 ```
 
 ---
 
-### Struct
+## Enum
 
 ```solidity
-struct Funder {
-    address addr;
-    uint amount;
+enum Status { Pending, Approved, Rejected }
+
+Status public current = Status.Pending;
+```
+
+---
+
+## Struct
+
+```solidity
+struct User {
+    address account;
+    uint256 balance;
 }
 ```
 
 ---
 
-### Mapping
+## Mapping
 
 ```solidity
-mapping(address => uint) public balances;
+mapping(address => uint256) public balances;
 ```
 
-Mappings behave like hash tables.
+> Mappings behave like hash tables.
 
 ---
 
-## Control Structures
+# Control Structures
 
 Available:
 - `if / else`
+- `for`
 - `while`
 - `do while`
-- `for`
 - `break`
 - `continue`
 - `return`
-- `? :`
+- ternary `? :`
 
 ---
 
-## Functions
+# Functions
 
-### Structure
+## Structure
 
 ```solidity
-function name(parameters)
-    public | private | internal | external
-    pure | view | payable
-    returns (type)
+function name(uint a)
+    public
+    view
+    returns (uint)
 ```
 
----
-
-### Access Modifiers
-
+Modifiers:
 - `public`
 - `private`
 - `internal`
 - `external`
+- `view`
+- `pure`
+- `payable`
 
 ---
 
-### Constructor
+## Constructor
 
 ```solidity
-contract C {
-    address owner;
-
-    constructor() {
-        owner = msg.sender;
-    }
+constructor() {
+    owner = msg.sender;
 }
 ```
 
 ---
 
-### External Call Syntax (0.8.x)
+## External Calls (0.8.x Syntax)
 
 ```solidity
 contractInstance.functionName{value: 1 ether, gas: 50000}();
@@ -207,27 +238,27 @@ contractInstance.functionName{value: 1 ether, gas: 50000}();
 
 ---
 
-### View Functions
+## View Function
 
 ```solidity
-function getValue() public view returns (uint) {
-    return 5;
+function getBalance() public view returns (uint) {
+    return address(this).balance;
 }
 ```
 
 ---
 
-### Pure Functions
+## Pure Function
 
 ```solidity
 function multiply(uint a) public pure returns (uint) {
-    return a * 42;
+    return a * 2;
 }
 ```
 
 ---
 
-### Payable Functions
+## Payable
 
 ```solidity
 function deposit() public payable {}
@@ -235,7 +266,7 @@ function deposit() public payable {}
 
 ---
 
-### Fallback & Receive (0.8.x)
+## Fallback & Receive
 
 ```solidity
 receive() external payable {}
@@ -243,23 +274,22 @@ receive() external payable {}
 fallback() external payable {}
 ```
 
+- `receive()` → triggered when ETH is sent without calldata
+- `fallback()` → triggered when function does not exist
+
 ---
 
-## Contracts
+# Contracts
 
-### Creating contracts using `new`
+## Creating with `new`
 
 ```solidity
-contract A {}
-
-contract C {
-    A a = new A();
-}
+ContractA a = new ContractA();
 ```
 
 ---
 
-### Inheritance
+## Inheritance
 
 ```solidity
 contract Owned {
@@ -275,17 +305,17 @@ contract Child is Owned {}
 
 ---
 
-## Interface
+# Interface
 
 ```solidity
-interface Token {
-    function transfer(address recipient, uint amount) external returns (bool);
+interface IToken {
+    function transfer(address to, uint amount) external returns (bool);
 }
 ```
 
 ---
 
-## Events
+# Events
 
 ```solidity
 event Deposit(address indexed from, uint amount);
@@ -295,9 +325,11 @@ function deposit() public payable {
 }
 ```
 
+Up to 3 parameters can be `indexed`.
+
 ---
 
-## Library
+# Library
 
 ```solidity
 library Math {
@@ -309,7 +341,7 @@ library Math {
 
 ---
 
-## Using For
+# Using For
 
 ```solidity
 using Math for uint;
@@ -319,7 +351,7 @@ uint result = 5.add(3);
 
 ---
 
-## Error Handling
+# Error Handling
 
 ```solidity
 require(condition, "Error message");
@@ -327,7 +359,7 @@ assert(condition);
 revert("Error message");
 ```
 
-### Custom Errors (0.8.4+)
+## Custom Errors (Gas Efficient)
 
 ```solidity
 error NotOwner();
@@ -337,16 +369,18 @@ if (msg.sender != owner) revert NotOwner();
 
 ---
 
-## Global Variables
+# Global Variables
 
-### Block
+## Block
+
 - `block.number`
 - `block.timestamp`
 - `block.coinbase`
 - `block.gaslimit`
 - `block.difficulty`
 
-### Transaction
+## Transaction
+
 - `msg.sender`
 - `msg.value`
 - `msg.data`
@@ -356,7 +390,7 @@ if (msg.sender != owner) revert NotOwner();
 
 ---
 
-## Cryptographic Functions
+# Cryptographic Functions
 
 - `keccak256()`
 - `sha256()`
@@ -367,7 +401,9 @@ if (msg.sender != owner) revert NotOwner();
 
 ---
 
-## Contract Related
+# Contract Related
 
 - `this`
 - `selfdestruct(address payable recipient)`
+
+> ⚠️ selfdestruct is discouraged in modern contract architecture.
